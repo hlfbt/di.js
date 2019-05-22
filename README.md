@@ -1,5 +1,7 @@
 # DI.js
 
+[![npm (tag)](https://img.shields.io/npm/v/@halfbit/di/latest.svg)][npm-link]
+
 DI.js is a simple yet extensible parameter dependency injection written in vanilla Javascript.
 
 ### Usage example
@@ -74,3 +76,6 @@ context.addAdapter('def', { 'cat': a => a.name, 'dog': a => a.name }, a => a);
 // 'Wooffers'
 context.evaluate("dog");
 ```
+
+
+[npm-link]: https://www.npmjs.com/package/@halfbit/di
