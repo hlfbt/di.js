@@ -274,8 +274,11 @@ const DI = function DI(typeDelimiter, typeDefaultName) {
          */
         run(context) {
             let args = [];
-            this.args.forEach(arg => {
-                args.push(arg.supply(context));
+            this.args.forEach((arg, i) => {
+                let value = arg.supply(context);
+                if (! (typeof value === 'undefined' && i === this.args.length - 1 && arg.isRestParameter())) {
+                    args.push(arg.supply(context));
+                }
             });
 
             return this.fn.apply(this.fn, args);
