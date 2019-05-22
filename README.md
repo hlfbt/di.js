@@ -15,7 +15,7 @@ import di from 'di';
 let context = new di.Context();
 context.addParameter('dog', { name: "Wooffers", bark: console.log.bind(window, 'Woof!') });
 
-// No need for ugly ['depency', function (dependency) {}] syntax
+// No need for ugly ['dependency', function (dependency) {}] syntax
 // Outputs 'Woof!' on the console!
 context.evaluate(dog => dog.bark());
 ```
@@ -49,6 +49,7 @@ context.evaluate("dog_str");
 
 // The third parameter is a fallback that is called if no matching input type is found
 context.addAdapter('str', { 'object': JSON.stringify }, String);
+
 // Returns '{"name":"Woofers"}'
 context.evaluate("dog_str");
 ```
