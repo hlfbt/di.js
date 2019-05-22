@@ -104,14 +104,12 @@ const DI = function DI(typeDelimiter, typeDefaultName) {
         constructor(arg) {
             this.type = di.TypeDefaultName;
             this.flags = 0;
-            this.default = undefined;
             this.defaultRaw = undefined;
 
             // Remove default value...
             if (arg.includes('=')) {
                 this.flags |= ArgumentFlags.DEFAULT;
                 this.defaultRaw = arg.substr(arg.indexOf('=') + 1).trim();
-                this.default = eval(this.defaultRaw);
                 arg = arg.substr(0, arg.indexOf('=')).trim();
             }
 
@@ -143,6 +141,10 @@ const DI = function DI(typeDelimiter, typeDefaultName) {
                     }
                 }
             }
+        }
+
+        get default() {
+            return eval(this.defaultRaw);
         }
 
         isRestParameter() {
