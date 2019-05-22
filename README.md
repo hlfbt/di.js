@@ -21,13 +21,8 @@ context.evaluate(dog => dog.bark());
 ```
 Under the hood, DI.js uses the functions `toString` method and some RegExp trickery to parse out all parameters.
 It works with named, anonymous and arrow functions, and supports default as well as rest parameters.
-The only current caveat is that it fails when the *last* parameter has a function as default:
-```js
-// Will fail with 'SyntaxError: Unexpected end of input'
-context.evaluate((a, b = () => {}) => console.log(a, b));
-// Works just fine
-context.evaluate((a, b = () => {}, c, d = '', ...e) => console.log(a, b, c, d, e));
-```
+
+A caveat is that parameters with functions with parameters themselves as default parameter will not work.
 
 ### Typing and custom adapters
 DI.js offers type conversion via `Adapter`s.
