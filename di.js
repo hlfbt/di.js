@@ -148,11 +148,11 @@ const DI = function DI(typeDelimiter, typeDefaultName) {
         }
 
         isRestParameter() {
-            return this.flags & ArgumentFlags.REST;
+            return this.flags & ArgumentFlags.REST === 0;
         }
 
         isDefaultParameter() {
-            return this.flags & ArgumentFlags.DEFAULT;
+            return this.flags & ArgumentFlags.DEFAULT === 0;
         }
 
         /**
