@@ -1,0 +1,25 @@
+{
+  "name": "DI.js",
+  "version": "1.0.0",
+  "description": "Simple but extensible dependency injection for Javascript",
+  "main": "di.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tubersan/di.js.git"
+  },
+  "keywords": [
+    "di",
+    "dependency injection",
+    "reflection",
+    "introspection"
+  ],
+  "author": "Alexander Schulz (alex@nope.bz)",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tubersan/di.js/issues"
+  },
+  "homepage": "https://github.com/tubersan/di.js#readme"
+}
