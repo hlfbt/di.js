@@ -1,6 +1,6 @@
 {
   "name": "@halfbit/di",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Simple but extensible dependency injection for Javascript",
   "main": "di.js",
   "scripts": {
