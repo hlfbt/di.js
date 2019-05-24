@@ -132,7 +132,7 @@ const DI = function DI(typeDelimiter, typeDefaultName) {
             let a = arg.split(di.TypeDelimiter);
             let name = a.slice(0, -1).join(di.TypeDelimiter);
             let type = a.slice(-1)[0];
-            if (type.length > 0 && !name.match(/^_*$/)) {
+            if (type.length > 0 && !name.match(new RegExp(`^${di.TypeDelimiter}*$`))) {
                 if (this.isRestParameter()) {
                     console.warn(`Type specifier of rest parameter '${arg}' will be ignored`);
                 } else {
