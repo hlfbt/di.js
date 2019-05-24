@@ -129,16 +129,15 @@ const DI = function DI(typeDelimiter, typeDefaultName) {
                 this.raw = '...' + this.raw;
             }
 
-            if (arg.includes(di.TypeDelimiter)) {
+            let a = arg.split(di.TypeDelimiter);
+            let name = a.slice(0, -1).join(di.TypeDelimiter);
+            let type = a.slice(-1)[0];
+            if (type.length > 0 && !name.match(/^_*$/)) {
                 if (this.isRestParameter()) {
                     console.warn(`Type specifier of rest parameter '${arg}' will be ignored`);
                 } else {
-                    let type, s = arg.split(di.TypeDelimiter);
-                    type = s.slice(-1)[0];
-                    if (type.length > 0) {
-                        this.name = s.slice(0, -1).join(di.TypeDelimiter);
-                        this.type = type;
-                    }
+                    this.name = name;
+                    this.type = type;
                 }
             }
         }
