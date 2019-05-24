@@ -311,7 +311,7 @@ const DI = function DI(typeDelimiter, typeDefaultName) {
         }
 
         set parameters(parameters) {
-            if (parameters === {}) {
+            if (parameters == undefined || Object.keys(parameters).length === 0) {
                 this._parameters = {};
                 return this._parameters;
             } else if (!parameters) {
@@ -358,7 +358,7 @@ const DI = function DI(typeDelimiter, typeDefaultName) {
         }
 
         set adapters(adapters) {
-            if (adapters === {}) {
+            if (adapters == undefined || Object.keys(adapters).length === 0) {
                 this._adapters = {};
                 return this._adapters;
             } else if (!adapters) {
