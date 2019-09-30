@@ -154,18 +154,37 @@ const DI = function DI(typeDelimiter, typeDefaultName) {
             return this.flags & ArgumentFlags.DEFAULT === 0;
         }
 
+        isEnriched() {
+            return !!this.adapter && !!this.parameter;
+        }
+
+
         /**
-         * Resolve the arguments dependency from the context and return the result.
+         * Process the argument and retrieve its value.
+         *
+         * @return {*}
+         */
+        get value() {
+            if (!this.isEnriched()) {
+                return undefined;
+            }
+
+            return this.adapter.convert(this.parameter.value, this.parameter.type);
+        }
+
+        /**
+         * Enrich this argument by resolving the dependency from the context.
          *
          * @param {DI.Context} context
-         * @returns {undefined}
+         * @return {this}
          */
-        supply(context) {
+        enrich(context) {
             if (!(this.name in context.parameters) || context.parameters[this.name].isUndefined()) {
                 return undefined;
             }
 
-            let adapter, parameter = context.parameters[this.name];
+            this.parameter = context.parameters[this.name];
+            let adapter;
 
             if (this.type in context.adapters) {
                 adapter = context.adapters[this.type];
@@ -183,7 +202,21 @@ const DI = function DI(typeDelimiter, typeDefaultName) {
                 throw new ReferenceError(`No Adapter for type '${this.type}' could be found in the Context: ${JSON.stringify(context.adapters)}`);
             }
 
-            return adapter.convert(parameter.value, parameter.type);
+            this.adapter = adapter;
+
+            return this;
+        }
+
+        /**
+         * Resolve the arguments dependency from the context and return the result.
+         *
+         * @param {DI.Context} context
+         * @returns {*}
+         */
+        supply(context) {
+            this.enrich(context);
+
+            return this.value;
         }
     };
 
@@ -266,21 +299,44 @@ const DI = function DI(typeDelimiter, typeDefaultName) {
         }
 
         /**
+         * Retrieve all the arguments, evaluate the function and return the result.
+         *
+         * @return {*}
+         */
+        get return() {
+            let args = [];
+            this.args.forEach((arg, i) => {
+                let value = arg.value;
+                if (! (typeof value === 'undefined' && i === this.args.length - 1 && arg.isRestParameter())) {
+                    args.push(value);
+                }
+            });
+
+            return this.fn.apply(this.fn, args);
+        }
+
+        /**
+         * Enrich all of this function's arguments by resolving the dependencies from the context.
+         *
+         * @param {DI.Context} context
+         * @return {this}
+         */
+        enrich(context) {
+            this.args.forEach(arg => arg.enrich(context));
+
+            return this;
+        }
+
+        /**
          * Execute the function against the given context.
          *
          * @param {DI.Context} context The context to execute the function with
          * @returns {*} The function's return
          */
         run(context) {
-            let args = [];
-            this.args.forEach((arg, i) => {
-                let value = arg.supply(context);
-                if (! (typeof value === 'undefined' && i === this.args.length - 1 && arg.isRestParameter())) {
-                    args.push(arg.supply(context));
-                }
-            });
+            this.enrich(context);
 
-            return this.fn.apply(this.fn, args);
+            return this.return;
         }
     };
 
@@ -300,6 +356,7 @@ const DI = function DI(typeDelimiter, typeDefaultName) {
         /**
          * Utility setter of single parameter.
          * Accepts either a single DI.Parameter instance, or all three name, value and the optional type parameters.
+         *
          * @param {DI.Parameter|string} name
          * @param {*} [value]
          * @param {string|*} [type]
@@ -329,7 +386,7 @@ const DI = function DI(typeDelimiter, typeDefaultName) {
                 }
             }
 
-            this._parameters;
+            return this._parameters;
         }
 
         get parameters() {
@@ -337,19 +394,13 @@ const DI = function DI(typeDelimiter, typeDefaultName) {
         }
 
         /**
-         * @param {string} type The name of the output type
-         * @param {Object<string, DI.Function>|function} fns A dictionary of input type names and their corresponding converter function
-         * @param {function} [fallback] An optional fallback function to use for unknown input types, the identity function is used by default (a => a)
-         * @param {string} [nativeType] An optional native type name for the output type if the given output type name is an alias (f.i. if type='str', then nativeType should be 'string')
-         */
-
-        /**
          * Utility setter of single adapter.
          * Accepts either a single DI.Adapter instance, or all four type, fns, optional fallback and optional nativeType parameters.
-         * @param {DI.Adapter|string} type
-         * @param {Object<string, DI.Function>|function} [fns]
-         * @param {function} [fallback]
-         * @param {string} [nativeType]
+         *
+         * @param {DI.Adapter|string} type The name of the output type
+         * @param {Object<string, DI.Function>|function} [fns] A dictionary of input type names and their corresponding converter function
+         * @param {function} [fallback] An optional fallback function to use for unknown input types, the identity function is used by default (a => a)
+         * @param {string} [nativeType] An optional native type name for the output type if the given output type name is an alias (f.i. if type='str', then nativeType should be 'string')
          */
         addAdapter(type, fns, fallback, nativeType) {
             if (typeof type !== 'undefined') {
@@ -386,20 +437,41 @@ const DI = function DI(typeDelimiter, typeDefaultName) {
         }
 
         /**
+         * Enrich an argument or function in this context.
+         * To "enrich" means to parse the expression and wrap it into a DI Object, linked to all dependencies and ready for evaluation.
+         * Strings are treated as arguments and functions as functions.
+         *
+         * @param {string|function} obj Either a string representing an argument or a non-native function
+         * @return {DI.Argument|DI.Function}
+         */
+        enrich(obj) {
+            if (typeof obj === 'string') {
+                return (new di.Argument(obj)).enrich(this);
+            } else if (typeof obj === 'function') {
+                return (new di.Function(obj)).enrich(this);
+            }
+
+            throw new TypeError(`Cannot evaluate type '${typeof obj}'`);
+        }
+
+        /**
          * Evaluate an argument or function in this context.
-         * Strings are treated as arguments and functions as .. functions.
+         * To "evaluate" means to parse the expression and evaluate it against this context, returning its evaluated value.
+         * Strings are treated as arguments and functions as functions.
          *
          * @param {string|function} obj Either a string representing an argument or a non-native function
          * @returns {*} The result of the evaluation
          */
         evaluate(obj) {
-            if (typeof obj === 'string') {
-                return new di.Argument(obj).supply(this);
-            } else if (typeof obj === 'function') {
-                return new di.Function(obj).run(this);
-            } else {
-                throw new TypeError(`Cannot evaluate type '${typeof obj}'`);
+            let enrichedObject = this.enrich(obj);
+
+            if (enrichedObject instanceof di.Argument) {
+                return enrichedObject.value;
+            } else if (enrichedObject instanceof di.Function) {
+                return enrichedObject.return;
             }
+
+            return undefined;
         }
     };
 
