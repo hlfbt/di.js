@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/tubersan/di.js.git"
+    "url": "git+https://github.com/hlfbt/di.js.git"
   },
   "keywords": [
     "di",
@@ -19,7 +19,7 @@
   "author": "Alexander Schulz (alex@nope.bz)",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/tubersan/di.js/issues"
+    "url": "https://github.com/hlfbt/di.js/issues"
   },
-  "homepage": "https://github.com/tubersan/di.js#readme"
+  "homepage": "https://github.com/hlfbt/di.js#readme"
 }
